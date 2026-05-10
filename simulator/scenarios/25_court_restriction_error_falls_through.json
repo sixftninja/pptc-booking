@@ -1,8 +1,8 @@
 {
-  "name": "Confirmation never loads",
-  "description": "After CAPTCHA, server hangs on confirmation. Bot times out, sends 'check manually' email, does not retry.",
-  "expected_result": "error_abort",
-  "expected_priority_hit": 1,
+  "name": "Court restriction error forces fallback to priority 3",
+  "description": "All hard courts marked available, but server returns 'Not allowed to book in this court' for any 9am attempt on hard. Priorities 1 and 2 (which require hour 9) all fail; priority 3 (10\u201312 hard same court) succeeds.",
+  "expected_result": "success_2h",
+  "expected_priority_hit": 3,
   "availability": {
     "hard": {
       "5a": [
@@ -96,11 +96,20 @@
     "capsolver_timeout": false,
     "capsolver_invalid_key": false,
     "cart_hang_first_load": false,
-    "confirmation_never_loads": true,
+    "confirmation_never_loads": false,
     "my_reservations_hide_booking": false,
     "court_restriction_error": {
-      "enabled": false,
-      "courts_and_hours": [],
+      "enabled": true,
+      "courts_and_hours": [
+        {
+          "court": "5a",
+          "hour": 9
+        },
+        {
+          "court": "4a",
+          "hour": 9
+        }
+      ],
       "title": "SCHEDULE",
       "message": "Not allowed to book in this court."
     },

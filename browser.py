@@ -285,6 +285,43 @@ def scan_availability(page: Page, courts: list[str]) -> dict[str, set[int]]:
 
 CONFIRMATION_RE = re.compile(r"confirmation\s*(?:number|#)?\s*[:\-]?\s*([A-Z0-9\-]+)", re.I)
 
+# Server-side rejection patterns that can appear after clicking Go.
+# Treated as SlotUnavailable: the booker dismisses the popup and moves on.
+RESTRICTION_PATTERNS = [
+    re.compile(r"not\s+allowed\s+to\s+book", re.I),
+    re.compile(r"restriction\s+failed", re.I),
+]
+
+
+def _detect_restriction_error(page: Page) -> str | None:
+    """Look for known post-Go restriction popups. Returns matched text or None."""
+    try:
+        body = page.content()
+    except Exception:
+        return None
+    for pat in RESTRICTION_PATTERNS:
+        m = pat.search(body)
+        if m:
+            return m.group(0)
+    return None
+
+
+def _dismiss_restriction_popup(page: Page) -> None:
+    """Click Ok on a post-Go error dialog (if one is visible)."""
+    for sel in (
+        config.SELECTORS["restriction_dialog_ok"],
+        '.ui-dialog-buttonset button',
+        'div[role="dialog"] button',
+    ):
+        try:
+            btn = page.query_selector(sel)
+            if btn and btn.is_visible():
+                btn.click()
+                return
+        except Exception:
+            continue
+    log.debug("No dismissable button found for restriction popup")
+
 
 def _click_cell(page: Page, court: str, hour: int) -> None:
     sel = _cell_selector(court, hour)
@@ -312,14 +349,8 @@ def _fill_modal_and_submit(page: Page) -> None:
             attendee.click()
             page.click(f'text="{config.ATTENDEE_NAME}"')
 
-    # Item Details dropdown.
-    item = modal.query_selector(config.SELECTORS["modal_item_details"])
-    if item is not None:
-        try:
-            item.select_option(label=config.ITEM_DETAILS_VALUE)
-        except Exception:
-            item.click()
-            page.click(f'text="{config.ITEM_DETAILS_VALUE}"')
+    # Item Details dropdown is pre-selected by the site for each slot.
+    # Do NOT touch it — the site picks the correct option for the court/time.
 
     # Waiver checkbox.
     waiver = modal.query_selector(config.SELECTORS["modal_waiver"])
@@ -405,6 +436,14 @@ def book_one_slot(page: Page, court: str, hour: int) -> str:
     log.info("Attempting to book Court %s at %02d:00", court.upper(), hour)
     _click_cell(page, court, hour)
     _fill_modal_and_submit(page)
+    # Server may reject the slot post-Go ("Not allowed to book in this court",
+    # "start time restriction failed", etc.). Dismiss and treat as unavailable
+    # so the caller can try the next candidate.
+    err = _detect_restriction_error(page)
+    if err:
+        log.warning("Slot %s@%02d:00 rejected by server: %s", court, hour, err)
+        _dismiss_restriction_popup(page)
+        raise SlotUnavailable(f"Server rejected slot ({err})")
     _solve_cart_and_submit(page)
     return _capture_confirmation(page)
 

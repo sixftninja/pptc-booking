@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block page_title %}{{ title or "Error" }}{% endblock %}
+{% block layout %}
+<main class="content">
+  <div id="error-popup" class="modal show" role="dialog" style="display: block">
+    <div class="modal-inner">
+      <div class="modal-header">{{ title or "SCHEDULE" }}</div>
+      <div class="modal-body">{{ message }}</div>
+      <div class="modal-actions">
+        <button type="button" id="ok-btn"
+                onclick="window.location='/Member/CourtReservation'">Ok</button>
+      </div>
+    </div>
+  </div>
+</main>
+{% endblock %}

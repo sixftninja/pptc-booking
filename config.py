@@ -30,7 +30,9 @@ else:
     LOGIN_URL = _REAL_LOGIN_URL
 
 # CapSolver. Real endpoint is api.capsolver.com; override for tests.
-CAPSOLVER_API_URL = os.getenv("CAPSOLVER_MOCK_URL", "https://api.capsolver.com").rstrip("/")
+# Use `or` (not the getenv default) so an empty string in .env still falls
+# through to the real URL.
+CAPSOLVER_API_URL = (os.getenv("CAPSOLVER_MOCK_URL") or "https://api.capsolver.com").rstrip("/")
 
 # Test mode: when set, suppress real SMTP and real git push, write metadata
 # to TEST_OUTPUT_DIR instead. Used by the simulator's runner.
@@ -55,6 +57,11 @@ HARD_COURTS = ["5a", "4a"]
 CLAY_COURTS = ["3a", "2a", "1a", "4b", "5b"]
 EXCLUDED_COURTS = {"6b"}
 
+# 4b and 5b are "permit courts" — bookable only 7am–7pm. Never attempt to
+# book them for slots that START at 19:00 (7pm) or later.
+PERMIT_COURTS = {"4b", "5b"}
+PERMIT_COURT_LATEST_START_HOUR = 18  # last allowed start hour for permit courts
+
 COURTS_BY_TYPE = {
     "hard": HARD_COURTS,
     "clay": CLAY_COURTS,
@@ -64,10 +71,11 @@ COURTS_BY_TYPE = {
 TYPE_LABEL_HARD = "Hard"
 TYPE_LABEL_CLAY = "Clay"
 
-# Member values used in booking modal dropdowns.
-# ATTENDEE_NAME comes from .env (must match the dropdown label exactly).
+# Attendee name used in the booking modal's Attendee dropdown — must match
+# the dropdown label exactly. Comes from .env.
 ATTENDEE_NAME = os.getenv("PPTC_ATTENDEE_NAME", "")
-ITEM_DETAILS_VALUE = "Online Indoor Court"
+# Item Details is pre-selected by the site for each slot. The booker MUST NOT
+# touch this dropdown — leave whatever the site has chosen.
 
 # --- Booking attempt timing --------------------------------------------------
 DEFAULT_TIMEOUT_MS = 15_000
@@ -105,13 +113,18 @@ SELECTORS = {
     "calendar_date_label": '.fc-toolbar-title, .calendar-current-date, h2.calendar-title',
 
     # Booking modal
+    # NOTE: there is intentionally no `modal_item_details` selector — the site
+    # pre-selects the correct value and the booker must never touch it.
     "modal":              '.modal.show, .modal[style*="display: block"], div[role="dialog"]',
     "modal_attendee":     'select[name*="ttendee"], select#Attendee',
-    "modal_item_details": 'select[name*="tem"], select#ItemDetails',
     "modal_notes":        'textarea[name*="otes"], textarea#ApptNotes',
     "modal_waiver":       'input[type="checkbox"][name*="aiver"], input[type="checkbox"]#Waiver, label:has-text("I have read and understand") input[type="checkbox"]',
     "modal_go":           'button:has-text("Go"), input[type="submit"][value="Go"]',
     "modal_cancel":       'button:has-text("Cancel")',
+
+    # Post-Go restriction popups (book denied by server)
+    "restriction_dialog":     '.modal.show, div[role="dialog"], .ui-dialog',
+    "restriction_dialog_ok":  'button:has-text("Ok"), button:has-text("OK")',
 
     # Cart / payment
     "cart_continue_shopping": 'button:has-text("Continue Shopping"), a:has-text("Continue Shopping")',

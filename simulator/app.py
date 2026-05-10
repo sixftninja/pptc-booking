@@ -236,6 +236,39 @@ def booking_modal():
                            court_type=court_type)
 
 
+def _matches_court_hour(rule: dict, court: str, hour: int) -> bool:
+    """Return True if (court, hour) is listed in rule['courts_and_hours']."""
+    for entry in rule.get("courts_and_hours") or []:
+        if entry.get("court") == court and entry.get("hour") == hour:
+            return True
+    return False
+
+
+def _restriction_response_or_none(pending: dict):
+    """If a post-Go restriction fault matches the pending booking, render the
+    error popup template and return that response. Otherwise return None."""
+    fi = STATE.scenario.get("fault_injection") or {}
+    court = pending.get("court")
+    hour = pending.get("hour")
+
+    rule = fi.get("court_restriction_error") or {}
+    if rule.get("enabled") and _matches_court_hour(rule, court, hour):
+        return render_template(
+            "error_popup.html",
+            title=rule.get("title", "SCHEDULE"),
+            message=rule.get("message", "Not allowed to book in this court."),
+        )
+
+    rule = fi.get("start_time_restriction_error") or {}
+    if rule.get("enabled") and _matches_court_hour(rule, court, hour):
+        return render_template(
+            "error_popup.html",
+            title=rule.get("title", "SCHEDULE"),
+            message=rule.get("message", "start time restriction failed"),
+        )
+    return None
+
+
 @app.route("/Member/Cart", methods=["GET", "POST"])
 def cart():
     r = _require_login_or_redirect()
@@ -253,9 +286,16 @@ def cart():
         if n == 1:
             time.sleep(30)
             return ("Gateway Timeout", 504)
+
+    # Post-Go restriction faults render an error popup INSTEAD of the cart.
+    pending = flask_session.get("pending_booking") or {}
+    restr = _restriction_response_or_none(pending)
+    if restr is not None:
+        flask_session.pop("pending_booking", None)
+        return restr
+
     with instr.TimedBlock("cart_load_duration"):
         _delay("cart_load")
-    pending = flask_session.get("pending_booking") or {}
     sitekey = cap.sitekey_for_mode(_captcha_mode()) if STATE.scenario.get("captcha_on_booking") else ""
     return render_template("cart.html",
                            pending=pending,

@@ -63,11 +63,21 @@ def target_date_for(d: date) -> date:
 # ---------------------------------------------------------------------------
 
 
+def _permit_court_allowed(court: str, hour: int) -> bool:
+    """Permit courts (4b, 5b) cannot be booked for slots starting at 19:00 or later."""
+    if court in config.PERMIT_COURTS and hour > config.PERMIT_COURT_LATEST_START_HOUR:
+        return False
+    return True
+
+
 def _candidates_two_hour_same(availability: dict[str, set[int]],
                               courts: list[str], start: int) -> list[tuple[str, str]]:
     """All courts that have both `start` and `start+1` open. Order matters."""
     out = []
     for c in courts:
+        # Both halves of a 2-hour block must be allowed for this court.
+        if not (_permit_court_allowed(c, start) and _permit_court_allowed(c, start + 1)):
+            continue
         hrs = availability.get(c, set())
         if start in hrs and (start + 1) in hrs:
             out.append((c, c))
@@ -77,9 +87,13 @@ def _candidates_two_hour_same(availability: dict[str, set[int]],
 def _candidates_two_hour_different(availability: dict[str, set[int]],
                                    courts: list[str], start: int) -> list[tuple[str, str]]:
     """All ordered (a, b) pairs where a != b, a has hour 1, b has hour 2."""
+    have_first = [c for c in courts
+                  if _permit_court_allowed(c, start)
+                  and start in availability.get(c, set())]
+    have_second = [c for c in courts
+                   if _permit_court_allowed(c, start + 1)
+                   and (start + 1) in availability.get(c, set())]
     out = []
-    have_first = [c for c in courts if start in availability.get(c, set())]
-    have_second = [c for c in courts if (start + 1) in availability.get(c, set())]
     for a in have_first:
         for b in have_second:
             if a != b:
@@ -89,7 +103,9 @@ def _candidates_two_hour_different(availability: dict[str, set[int]],
 
 def _candidates_one_hour(availability: dict[str, set[int]],
                          courts: list[str], hour: int) -> list[str]:
-    return [c for c in courts if hour in availability.get(c, set())]
+    return [c for c in courts
+            if _permit_court_allowed(c, hour)
+            and hour in availability.get(c, set())]
 
 
 # ---------------------------------------------------------------------------
@@ -142,14 +158,23 @@ def _scan_all(page, target: date, sess: SessionContext) -> dict[str, set[int]]:
     return merged
 
 
+def _mark_unavailable(availability: dict[str, set[int]], court: str, hour: int) -> None:
+    """Drop (court, hour) from the in-memory availability map so future
+    priority entries don't try the same slot again."""
+    bucket = availability.get(court)
+    if bucket is not None:
+        bucket.discard(hour)
+
+
 def _try_two_hour_pair(page, target: date, court_type: str,
                        court_a: str, hour_a: int,
                        court_b: str, hour_b: int,
-                       sess: SessionContext) -> dict | None:
+                       sess: SessionContext,
+                       availability: dict[str, set[int]]) -> dict | None:
     """Attempt to book hour 1 then hour 2.
 
     Return values:
-      None                          -> hour 1 failed (slot taken). Caller can try next pair.
+      None                          -> hour 1 failed (slot taken / restricted). Caller can try next pair.
       {status: 'captcha_no_booking'}-> CAPTCHA failed before any hour booked. Caller aborts.
       {status: 'ok_full', ...}      -> both hours booked.
       {status: 'ok_partial', ...}   -> hour 1 booked, hour 2 lost (slot taken or CAPTCHA).
@@ -159,6 +184,7 @@ def _try_two_hour_pair(page, target: date, court_type: str,
     try:
         conf_a = browser.book_one_slot(page, court_a, hour_a)
     except browser.SlotUnavailable:
+        _mark_unavailable(availability, court_a, hour_a)
         return None
     except browser.CartCaptchaFailed:
         notifier.send_captcha_alert(target, court_a, hour_a)
@@ -175,6 +201,7 @@ def _try_two_hour_pair(page, target: date, court_type: str,
         conf_b = browser.book_one_slot(page, court_b, hour_b)
     except browser.SlotUnavailable:
         log.warning("Hour 2 slot was taken between scan and booking")
+        _mark_unavailable(availability, court_b, hour_b)
         notifier.send_partial_taken(target, court_a, hour_a, conf_a, court_b, hour_b)
         return {
             "status": "ok_partial",
@@ -223,6 +250,7 @@ def _book_entry(page, target: date, entry: tuple,
                 conf = browser.book_one_slot(page, court, start)
             except browser.SlotUnavailable:
                 log.info("Slot %s@%d unavailable on click — trying next candidate", court, start)
+                _mark_unavailable(availability, court, start)
                 continue
             except browser.CartCaptchaFailed:
                 notifier.send_captcha_alert(target, court, start)
@@ -243,7 +271,7 @@ def _book_entry(page, target: date, entry: tuple,
         else _candidates_two_hour_different(availability, courts, start)
     )
     for (a, b) in pairs:
-        result = _try_two_hour_pair(page, target, court_type, a, start, b, start + 1, sess)
+        result = _try_two_hour_pair(page, target, court_type, a, start, b, start + 1, sess, availability)
         if result is None:
             log.info("Pair %s@%d + %s@%d unavailable — trying next pair", a, start, b, start + 1)
             continue

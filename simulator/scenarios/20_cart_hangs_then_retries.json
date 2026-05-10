@@ -97,7 +97,19 @@
     "capsolver_invalid_key": false,
     "cart_hang_first_load": true,
     "confirmation_never_loads": false,
-    "my_reservations_hide_booking": false
+    "my_reservations_hide_booking": false,
+    "court_restriction_error": {
+      "enabled": false,
+      "courts_and_hours": [],
+      "title": "SCHEDULE",
+      "message": "Not allowed to book in this court."
+    },
+    "start_time_restriction_error": {
+      "enabled": false,
+      "courts_and_hours": [],
+      "title": "SCHEDULE",
+      "message": "start time restriction failed"
+    }
   },
   "session": {
     "expire_after_login": false,
