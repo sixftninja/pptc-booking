@@ -1,0 +1,37 @@
+<div id="booking-modal" class="modal show" role="dialog" style="display: block">
+  <div class="modal-inner">
+    <div class="modal-row">StartTime
+      <input type="text" id="start-time" readonly value="{{ '%d:00%s'|format(hour if hour <= 12 else hour - 12, 'AM' if hour < 12 else 'PM') }}">
+    </div>
+    <div class="modal-row">EndTime
+      <input type="text" id="end-time" readonly value="{{ '%d:00%s'|format((hour+1) if (hour+1) <= 12 else (hour+1) - 12, 'AM' if (hour+1) < 12 else 'PM') }}">
+    </div>
+    <div class="modal-row">Attendee
+      <select id="attendee" name="attendee">
+        <option>Anand Altekar</option>
+      </select>
+    </div>
+    <div class="modal-row">Item Details
+      <select id="item-details" name="item-details">
+        <option>Online Indoor Court</option>
+      </select>
+    </div>
+    <div class="modal-row">Appt Notes
+      <textarea id="appt-notes" name="appt-notes"></textarea>
+    </div>
+    <div class="waiver-text">Prospect Park Tennis Center Waiver and Release from Liability — sample text.</div>
+    <div class="modal-row checkbox-row">
+      <input type="checkbox" id="waiver-checkbox" name="waiver">
+      <label for="waiver-checkbox">I have read and understand all of the terms outlined on this form.</label>
+    </div>
+    <div class="modal-actions">
+      <form method="get" action="/Member/Cart">
+        <input type="hidden" name="court" value="{{ court }}">
+        <input type="hidden" name="hour" value="{{ hour }}">
+        <input type="hidden" name="type" value="{{ court_type }}">
+        <button id="go-btn" type="submit">Go</button>
+      </form>
+      <button id="cancel-btn" type="button" onclick="closeModal()">Cancel</button>
+    </div>
+  </div>
+</div>

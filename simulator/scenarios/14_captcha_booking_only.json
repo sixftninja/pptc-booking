@@ -1,0 +1,116 @@
+{
+  "name": "CAPTCHA at booking only",
+  "description": "Booking requires CAPTCHA (test mode). Login does not. Bot books normally.",
+  "expected_result": "success_2h",
+  "expected_priority_hit": 1,
+  "availability": {
+    "hard": {
+      "5a": [
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16
+      ],
+      "4a": [
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16
+      ]
+    },
+    "clay": {
+      "3a": [
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16
+      ],
+      "2a": [
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16
+      ],
+      "1a": [
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16
+      ],
+      "4b": [
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16
+      ],
+      "5b": [
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16
+      ],
+      "6b": []
+    }
+  },
+  "captcha_mode": "test",
+  "captcha_on_login": false,
+  "captcha_on_booking": true,
+  "race_condition": {
+    "enabled": false,
+    "type": null,
+    "trigger_after_court": null,
+    "trigger_after_hour": null,
+    "mark_unavailable_court": null,
+    "mark_unavailable_hours": [],
+    "mark_court_type": "hard"
+  },
+  "fault_injection": {
+    "capsolver_timeout": false,
+    "capsolver_invalid_key": false,
+    "cart_hang_first_load": false,
+    "confirmation_never_loads": false,
+    "my_reservations_hide_booking": false
+  },
+  "session": {
+    "expire_after_login": false,
+    "expire_after_booking_count": null
+  },
+  "response_delays_ms": {
+    "login": 300,
+    "calendar_load": 400,
+    "type_dropdown_switch": 600,
+    "modal_open": 200,
+    "cart_load": 500,
+    "captcha_page_load": 300,
+    "confirmation": 400,
+    "my_reservations_load": 300
+  }
+}

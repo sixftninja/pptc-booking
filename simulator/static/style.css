@@ -1,0 +1,269 @@
+:root {
+  --green: #4a7c59;
+  --green-dark: #355a40;
+  --green-muted: #6b8c72;
+  --bg: #f7f8f7;
+  --card: #ffffff;
+  --text: #1f2a23;
+  --muted: #6a7a70;
+  --border: #e2e8e4;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+               Helvetica, Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+}
+.site-header {
+  background: var(--green);
+  color: white;
+  padding: 16px 20px;
+  display: flex;
+  align-items: baseline;
+  gap: 24px;
+}
+.site-header .brand { font-weight: 600; font-size: 18px; }
+.site-header .page-title { opacity: 0.9; font-size: 16px; }
+.page { display: flex; min-height: calc(100vh - 64px); }
+.left-nav {
+  width: 220px;
+  background: var(--green);
+  color: white;
+  padding: 18px 0;
+  flex-shrink: 0;
+}
+.left-nav .user-name { padding: 0 18px 14px; font-weight: 600; }
+.left-nav a {
+  display: block;
+  padding: 9px 18px;
+  color: rgba(255,255,255,0.9);
+  text-decoration: none;
+  font-size: 14px;
+  border-left: 3px solid transparent;
+}
+.left-nav a:hover { background: var(--green-dark); }
+.left-nav a.active { background: var(--green-dark); border-left-color: white; }
+.left-nav a.sub-link { padding-left: 32px; opacity: 0.9; }
+.left-nav .nav-section {
+  padding: 12px 18px 4px;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: rgba(255,255,255,0.7);
+}
+.left-nav .nav-section a { padding-left: 32px; text-transform: none; font-size: 14px; }
+.content {
+  flex: 1;
+  padding: 24px 28px;
+  overflow-x: auto;
+}
+.centered {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 16px;
+}
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 24px;
+}
+.login-card { width: 360px; max-width: 100%; }
+.login-card h1 { margin: 0 0 16px; color: var(--green-dark); }
+.login-card label { display: block; margin-bottom: 12px; font-size: 14px; }
+.login-card input[type="email"],
+.login-card input[type="password"] {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 14px;
+}
+.remember-me { margin-bottom: 12px; font-size: 14px; }
+.remember-me input { margin-right: 6px; }
+button {
+  background: var(--green);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 16px;
+  font-size: 14px;
+  cursor: pointer;
+}
+button:hover { background: var(--green-dark); }
+button:disabled { background: #aab; cursor: not-allowed; opacity: 0.6; }
+.error {
+  background: #fde8e6;
+  color: #8b1c1c;
+  padding: 8px 12px;
+  border-radius: 6px;
+  margin-bottom: 12px;
+  font-size: 14px;
+}
+
+.court-controls {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 18px;
+  flex-wrap: wrap;
+}
+.court-controls h2 { margin: 0; font-size: 16px; color: var(--green-dark); }
+.court-controls select {
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 14px;
+}
+.day-nav button { padding: 4px 10px; font-size: 14px; }
+
+.calendar-grid {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.calendar-grid th, .calendar-grid td {
+  padding: 8px 10px;
+  text-align: center;
+  border-bottom: 1px solid var(--border);
+  border-right: 1px solid var(--border);
+}
+.calendar-grid th {
+  background: #f0f4f1;
+  color: var(--green-dark);
+  font-weight: 600;
+  font-size: 13px;
+}
+.calendar-grid .time-label {
+  background: #f7faf8;
+  font-size: 13px;
+  color: var(--muted);
+  width: 64px;
+}
+.slot { height: 36px; min-width: 88px; }
+.slot.available {
+  background: white;
+  cursor: pointer;
+}
+.slot.available:hover { background: #eaf3ee; }
+.slot.reserved {
+  background: var(--green-muted);
+  color: white;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+#booking-modal, #confirmation-popup {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+.modal-inner {
+  background: white;
+  border-radius: 10px;
+  width: 480px;
+  max-width: 90%;
+  padding: 22px;
+}
+.modal-header {
+  font-weight: 600;
+  color: var(--green-dark);
+  margin-bottom: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.modal-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  margin-bottom: 10px;
+}
+.modal-row input[type="text"], .modal-row select, .modal-row textarea {
+  flex: 1;
+  padding: 6px 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 14px;
+}
+.modal-row.checkbox-row { gap: 8px; }
+.waiver-text {
+  font-size: 12px;
+  color: var(--muted);
+  background: #f5f7f6;
+  border-radius: 6px;
+  padding: 10px;
+  margin: 10px 0;
+}
+.modal-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 12px;
+}
+.modal-actions form { display: inline; }
+
+.cart-page .cart-item, .cart-page .cart-totals, .cart-page .payment-section {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 16px;
+  margin-bottom: 14px;
+  font-size: 14px;
+}
+.cart-page .cart-actions { display: flex; gap: 10px; margin-bottom: 14px; }
+.cart-page select, .cart-page textarea {
+  width: 100%;
+  padding: 6px 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  margin: 6px 0;
+  font-size: 14px;
+}
+
+.confirmation-page #confirmation-inline {
+  background: #e6f0e9;
+  color: var(--green-dark);
+  padding: 14px;
+  border-radius: 10px;
+  margin-bottom: 14px;
+}
+.my-reservations-page .reservation-item {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 16px;
+  margin: 10px 0;
+}
+.my-reservations-page .range-buttons {
+  display: flex;
+  gap: 6px;
+  margin: 10px 0;
+}
+.no-reservations {
+  background: white;
+  border: 1px dashed var(--border);
+  border-radius: 10px;
+  padding: 24px;
+  text-align: center;
+  color: var(--muted);
+}
+
+@media (max-width: 720px) {
+  .page { flex-direction: column; }
+  .left-nav { width: 100%; padding: 8px 0; }
+  .left-nav .nav-section { padding-top: 6px; }
+  .calendar-grid { font-size: 12px; }
+}

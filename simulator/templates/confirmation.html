@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block page_title %}Confirmation{% endblock %}
+{% block layout %}
+<main class="content confirmation-page">
+  <div id="confirmation-inline">
+    The transaction has been approved. Your confirmation number is {{ confirmation }}
+    <a href="#">Click here to view receipt</a>
+  </div>
+  <div id="confirmation-popup" class="modal show" role="dialog" style="display: block">
+    <div class="modal-inner">
+      <div class="modal-header">INFORMATION</div>
+      <div class="modal-body">
+        The transaction has been approved. Your confirmation number is {{ confirmation }}
+      </div>
+      <div class="modal-actions">
+        <button type="button" id="ok-btn" onclick="document.getElementById('confirmation-popup').style.display='none'">Ok</button>
+      </div>
+    </div>
+  </div>
+  <p><a href="/Member/CourtReservation">Back to Court Reservation</a> · <a href="/Member/MyReservations">My Reservations</a></p>
+</main>
+{% endblock %}

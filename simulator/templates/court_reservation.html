@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block page_title %}Court Reservation{% endblock %}
+{% block layout %}
+<nav class="left-nav">
+  <div class="user-name">Anand</div>
+  <a>Member Info</a>
+  <a>Camp</a>
+  <a href="/Member/MyReservations">Account Activity</a>
+  <a href="/Member/MyReservations" class="sub-link">My Reservations</a>
+  <div class="nav-section open">Programs &amp; Services
+    <a href="/Member/CourtReservation" class="active">Court Reservation</a>
+    <a>Program Registration</a>
+    <a>Class Registration</a>
+  </div>
+  <a>Information</a>
+</nav>
+
+<main class="content">
+  <div class="court-controls">
+    <form method="get" action="/Member/CourtReservation" class="type-form">
+      <label>Type
+        <select id="court-type" name="type" onchange="this.form.submit()">
+          <option value="Hard"  {% if court_type == 'Hard' %}selected{% endif %}>Hard</option>
+          <option value="Clay"  {% if court_type == 'Clay' %}selected{% endif %}>Clay</option>
+        </select>
+      </label>
+    </form>
+    <div class="day-nav">
+      <button class="prev-day" type="button" disabled>◀</button>
+      <button class="today" type="button" disabled>today</button>
+      <button class="next-day" type="button" disabled>▶</button>
+    </div>
+    <h2 class="calendar-date">{{ date_label }}</h2>
+  </div>
+
+  <table class="calendar-grid">
+    <thead>
+      <tr>
+        <th></th>
+        {% for c in courts %}
+          <th>Court {{ c }}</th>
+        {% endfor %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in grid %}
+      <tr>
+        <td class="time-label">
+          {% if row.hour == 0 %}12am
+          {% elif row.hour < 12 %}{{ row.hour }}am
+          {% elif row.hour == 12 %}12pm
+          {% else %}{{ row.hour - 12 }}pm{% endif %}
+        </td>
+        {% for cell in row.row %}
+          {% if cell.available %}
+            <td class="slot available"
+                data-court="{{ cell.court }}"
+                data-hour="{{ cell.hour }}"
+                data-type="{{ court_type }}"
+                onclick="openModal('{{ court_type }}', '{{ cell.court }}', {{ cell.hour }})">
+            </td>
+          {% else %}
+            <td class="slot reserved"
+                data-court="{{ cell.court }}"
+                data-hour="{{ cell.hour }}"
+                aria-disabled="true">RESERVED</td>
+          {% endif %}
+        {% endfor %}
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <div id="booking-modal-host"></div>
+</main>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='calendar.js') }}"></script>
+{% endblock %}

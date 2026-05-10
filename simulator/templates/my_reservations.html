@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block page_title %}My Reservations{% endblock %}
+{% block layout %}
+<nav class="left-nav">
+  <div class="user-name">Anand</div>
+  <a>Member Info</a>
+  <a>Camp</a>
+  <a href="/Member/MyReservations" class="active">Account Activity</a>
+  <a href="/Member/MyReservations" class="sub-link">My Reservations</a>
+  <div class="nav-section">Programs &amp; Services
+    <a href="/Member/CourtReservation">Court Reservation</a>
+  </div>
+</nav>
+<main class="content my-reservations-page">
+  <div>Date Range: {{ date_short }} to 06/10/2026</div>
+  <div class="range-buttons">
+    <button>WEEKLY</button><button>MONTHLY</button><button>YEARLY</button>
+    <button>CUSTOM</button><button>PRINT</button>
+  </div>
+  {% if bookings %}
+    {% for b in bookings %}
+    <div class="reservation-item">
+      <div>Service: Online Indoor Court</div>
+      <div>Date: {{ date_short }}</div>
+      <div>Day: {{ target_date_label.split(",")[0] }}</div>
+      <div>Start Time: {{ '%02d:00%s'|format((b.hour if b.hour <= 12 else b.hour - 12), 'AM' if b.hour < 12 else 'PM') }}</div>
+      <div>End Time: {{ '%02d:00%s'|format(((b.hour+1) if (b.hour+1) <= 12 else (b.hour+1) - 12), 'AM' if (b.hour+1) < 12 else 'PM') }}</div>
+      <div>Resource: Court {{ b.court }}</div>
+      <div>Instructor: No Instructor</div>
+      <div>Member: {{ b.attendee }}</div>
+    </div>
+    {% endfor %}
+  {% else %}
+    <div class="no-reservations">You have no reservations.</div>
+  {% endif %}
+</main>
+{% endblock %}

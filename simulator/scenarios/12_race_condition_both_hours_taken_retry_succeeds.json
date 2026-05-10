@@ -1,0 +1,122 @@
+{
+  "name": "Race: priorities 1 and 2 lost mid-flow",
+  "description": "After bot books 5a@9, all of 9\u201311 disappears. Bot moves to priority 3 (10\u201312 hard same court).",
+  "expected_result": "success_2h",
+  "expected_priority_hit": 3,
+  "availability": {
+    "hard": {
+      "5a": [
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16
+      ],
+      "4a": [
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16
+      ]
+    },
+    "clay": {
+      "3a": [
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16
+      ],
+      "2a": [
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16
+      ],
+      "1a": [
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16
+      ],
+      "4b": [
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16
+      ],
+      "5b": [
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16
+      ],
+      "6b": []
+    }
+  },
+  "captcha_mode": "test",
+  "captcha_on_login": false,
+  "captcha_on_booking": true,
+  "race_condition": {
+    "enabled": true,
+    "type": "post_booking_remove",
+    "trigger_after_court": "5a",
+    "trigger_after_hour": 9,
+    "mark_unavailable_court": [
+      "5a",
+      "4a"
+    ],
+    "mark_unavailable_hours": [
+      9,
+      10
+    ],
+    "mark_court_type": "hard"
+  },
+  "fault_injection": {
+    "capsolver_timeout": false,
+    "capsolver_invalid_key": false,
+    "cart_hang_first_load": false,
+    "confirmation_never_loads": false,
+    "my_reservations_hide_booking": false
+  },
+  "session": {
+    "expire_after_login": false,
+    "expire_after_booking_count": null
+  },
+  "response_delays_ms": {
+    "login": 300,
+    "calendar_load": 400,
+    "type_dropdown_switch": 600,
+    "modal_open": 200,
+    "cart_load": 500,
+    "captcha_page_load": 300,
+    "confirmation": 400,
+    "my_reservations_load": 300
+  }
+}

@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block page_title %}Member Dashboard{% endblock %}
+{% block layout %}
+<nav class="left-nav">
+  <div class="user-name">Anand</div>
+  <a>Member Info</a>
+  <a>Camp</a>
+  <a href="/Member/MyReservations">Account Activity</a>
+  <a href="/Member/MyReservations" class="sub-link">My Reservations</a>
+  <div class="nav-section">Programs &amp; Services
+    <a href="/Member/CourtReservation">Court Reservation</a>
+    <a>Program Registration</a>
+    <a>Class Registration</a>
+  </div>
+  <a>Information</a>
+</nav>
+<main class="content">
+  <h1>Welcome, Anand</h1>
+  <p>Use Programs &amp; Services → Court Reservation to book a court.</p>
+</main>
+{% endblock %}

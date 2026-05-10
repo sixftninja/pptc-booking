@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block page_title %}Member Sign In{% endblock %}
+{% block head_extra %}
+  {% if widget %}
+  <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+  {% endif %}
+{% endblock %}
+{% block layout %}
+<main class="centered">
+  <form class="card login-card" method="post" action="/Member">
+    <h1>Sign In</h1>
+    {% if error %}<div class="error">{{ error }}</div>{% endif %}
+    <label>Email
+      <input type="email" name="email" id="Email" autocomplete="username" required>
+    </label>
+    <label>Password
+      <input type="password" name="password" id="Password" autocomplete="current-password" required>
+    </label>
+    <div class="remember-me">
+      <input type="checkbox" id="remember" name="remember">
+      <label for="remember">Remember me</label>
+    </div>
+    {% if widget and sitekey %}
+    <div class="g-recaptcha" data-sitekey="{{ sitekey }}"></div>
+    {% endif %}
+    <button type="submit">Sign In</button>
+  </form>
+</main>
+{% endblock %}

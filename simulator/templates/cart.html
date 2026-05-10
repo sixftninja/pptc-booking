@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block page_title %}Cart{% endblock %}
+{% block head_extra %}
+  {% if widget %}
+  <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+  {% endif %}
+{% endblock %}
+{% block layout %}
+<main class="content cart-page">
+  <div class="cart-item">
+    <div>Location: Brooklyn</div>
+    <div>Member Name: Anand Altekar</div>
+    <div>Class Description: Online Indoor Court</div>
+    <div>Qty: 1.00</div>
+    <div>Price: $84.00</div>
+    <div>Total: $84.00</div>
+    <div>Deposit/Amount Due: $84.00</div>
+  </div>
+  <div class="cart-totals">
+    <div>Total Programs: 1</div>
+    <div>Total Price: $84.00</div>
+    <div>Payment Due Now: $84.00</div>
+  </div>
+  <div class="cart-actions">
+    <button type="button" onclick="window.location='/Member/CourtReservation'">Continue Shopping</button>
+    <button type="button">Clear Cart</button>
+  </div>
+  <form method="post" action="/Member/Cart" class="payment-section">
+    <div>Amount: {{ amount }}</div>
+    <div>Discount: $0.00</div>
+    <div>Charged: ${{ amount }}</div>
+    <select id="credit-card" name="credit-card">
+      <option>Credit Card on File</option>
+    </select>
+    <textarea id="notes-to-club" name="notes-to-club"></textarea>
+    <div class="waiver-text">Sample waiver text on cart page.</div>
+    <div>
+      <input type="checkbox" id="waiver-checkbox-cart" name="waiver-cart">
+      <label>I have read and understand all of the terms outlined on this form.</label>
+    </div>
+    {% if widget and sitekey %}
+    <div class="g-recaptcha" data-sitekey="{{ sitekey }}"></div>
+    {% endif %}
+    <button type="submit" id="submit-payment">Submit</button>
+  </form>
+</main>
+{% endblock %}
