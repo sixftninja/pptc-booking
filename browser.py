@@ -145,18 +145,25 @@ def session_expired(page: Page) -> bool:
 
 
 def open_court_reservation(page: Page) -> None:
-    """Navigate via left nav: Programs & Services → Court Reservation."""
+    """Navigate directly to the calendar page.
+
+    The dashboard left-nav loads the calendar inside an iframe (via JS
+    function CourtBooking()), which complicates everything downstream.
+    The same calendar is reachable at /Member/Aptus/Calender as a top-level
+    page — much simpler. Use that.
+    """
     log.info("Opening Court Reservation page")
-    # Some portals expand on hover, others on click. Click both to be safe.
-    nav_root = page.query_selector(config.SELECTORS["nav_programs"])
-    if nav_root:
-        try:
-            nav_root.click()
-        except Exception:
-            log.debug("Programs & Services click was a no-op; nav may already be expanded")
-    page.click(config.SELECTORS["nav_court_res"])
-    page.wait_for_load_state("networkidle", timeout=config.DEFAULT_TIMEOUT_MS)
-    page.wait_for_selector(config.SELECTORS["type_dropdown"], timeout=config.DEFAULT_TIMEOUT_MS)
+    calendar_url = config.SITE_BASE_URL + "/Member/Aptus/Calender"
+    page.goto(calendar_url, wait_until="networkidle", timeout=config.DEFAULT_TIMEOUT_MS * 2)
+    # The Resource dropdown is rendered immediately but its <option> elements
+    # are populated asynchronously by Knockout. Wait for at least one option.
+    page.wait_for_function(
+        """() => {
+            const r = document.querySelector('#Resource');
+            return r && r.options.length > 0;
+        }""",
+        timeout=config.DEFAULT_TIMEOUT_MS * 3,
+    )
 
 
 def select_court_type(page: Page, court_type: str) -> None:
@@ -204,20 +211,51 @@ def _read_calendar_date(page: Page) -> date:
 
 
 def navigate_to_date(page: Page, target: date) -> None:
-    """Click the next/prev arrows until the calendar shows the target date."""
+    """Move the calendar to the target date.
+
+    First try FullCalendar's `gotoDate` JS API — far more reliable than
+    clicking next/prev spans, which sometimes lose their click handlers
+    on the real PPTC site.
+
+    Fall back to click navigation if the API isn't reachable.
+    """
     log.info("Navigating calendar to %s", target.isoformat())
-    # Bound the loop to avoid infinite clicks if something is broken.
-    for _ in range(60):
-        current = _read_calendar_date(page)
+
+    has_fc = page.evaluate(
+        "() => !!(window.jQuery && window.jQuery('#calendar').fullCalendar)"
+    )
+    if has_fc:
+        log.info("Using FullCalendar gotoDate API")
+        page.evaluate(
+            "(iso) => { window.jQuery('#calendar').fullCalendar('gotoDate', new Date(iso + 'T12:00:00')); }",
+            target.isoformat(),
+        )
+        # Give knockout/AJAX time to redraw the day's events.
+        page.wait_for_timeout(2500)
+        try:
+            current = _read_calendar_date(page)
+            if current == target:
+                log.info("Calendar landed on %s via API", target.isoformat())
+                return
+            log.warning("API put us on %s, wanted %s — falling back to click nav",
+                        current, target)
+        except Exception as exc:
+            log.warning("Couldn't re-read date after API call: %s — falling back", exc)
+
+    # Click fallback
+    for i in range(60):
+        try:
+            current = _read_calendar_date(page)
+        except Exception as exc:
+            log.warning("Could not read calendar date label: %s", exc)
+            break
+        log.info("  iter %d: calendar shows %s", i, current)
         if current == target:
             log.info("Calendar is on %s", target.isoformat())
             return
-        if current < target:
-            page.click(config.SELECTORS["calendar_next"])
-        else:
-            page.click(config.SELECTORS["calendar_prev"])
-        # Brief pause for the calendar to redraw.
-        time.sleep(0.5)
+        sel = config.SELECTORS["calendar_next"] if current < target else config.SELECTORS["calendar_prev"]
+        page.click(sel)
+        time.sleep(0.6)
         page.wait_for_load_state("networkidle", timeout=config.SHORT_TIMEOUT_MS)
     raise RuntimeError(f"Could not navigate calendar to {target}")
 

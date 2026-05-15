@@ -11,3 +11,6 @@ simulator/test_results/
 
 # Internal-only build prompt — kept locally as reference, not committed
 pptc_simulator_prompt.md
+
+# Real-site DOM dumps — contain personal data (name, reservations, etc.)
+fixtures/

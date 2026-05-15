@@ -336,13 +336,16 @@ def main() -> int:
     log.info("Run date: %s (weekday=%d) TEST_MODE=%s MOCK_URL=%s",
              run_date.isoformat(), run_date.weekday(), config.TEST_MODE, config.MOCK_URL or "<none>")
 
-    if not in_active_window(run_date):
+    force = os.getenv("FORCE_RUN", "").strip() in ("1", "true", "yes")
+    if not in_active_window(run_date) and not force:
         log.info("Outside active window (%s to %s) — exiting",
                  config.ACTIVE_START_DATE, config.ACTIVE_END_DATE)
         return 0
-    if run_date.weekday() not in config.RUN_WEEKDAYS:
+    if run_date.weekday() not in config.RUN_WEEKDAYS and not force:
         log.info("Not a Saturday/Sunday — exiting")
         return 0
+    if force:
+        log.info("FORCE_RUN active — bypassing weekday/window guards")
 
     target = target_date_for(run_date)
     log.info("Target date: %s (%s)", target.isoformat(), target.strftime("%a"))

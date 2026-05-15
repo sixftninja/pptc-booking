@@ -95,10 +95,10 @@ USER_AGENT = (
 # minor tweaks after the first live test run on May 10, 2026.
 SELECTORS = {
     # Login page
-    "login_email":       'input[name="Email"], input[type="email"], #Email',
-    "login_password":    'input[name="Password"], input[type="password"], #Password',
-    "login_submit":      'button:has-text("Sign In"), input[type="submit"][value*="Sign"]',
-    "login_error":       '.validation-summary-errors, .alert-danger, .field-validation-error',
+    "login_email":       '#email, input[name="email"]',
+    "login_password":    '#password, input[name="password"]',
+    "login_submit":      '#btnSignIn, button:has-text("Sign In")',
+    "login_error":       '.validation-summary-errors, .alert-danger, .field-validation-error, .msgBox',
 
     # Left navigation
     "nav_programs":      'a:has-text("Programs & Services"), button:has-text("Programs & Services")',
@@ -106,11 +106,11 @@ SELECTORS = {
     "nav_account":       'a:has-text("Account Activity"), button:has-text("Account Activity")',
     "nav_my_reservations": 'a:has-text("My Reservations")',
 
-    # Court Reservation page
-    "type_dropdown":     'select:has(option:text-is("Hard")), select#type, select[name*="ype"]',
-    "calendar_next":     'button[aria-label*="Next" i], button:has-text("›"), .fc-next-button, .calendar-next',
-    "calendar_prev":     'button[aria-label*="Prev" i], button:has-text("‹"), .fc-prev-button, .calendar-prev',
-    "calendar_date_label": '.fc-toolbar-title, .calendar-current-date, h2.calendar-title',
+    # Court Reservation page (FullCalendar resource-day view)
+    "type_dropdown":     '#Resource',
+    "calendar_next":     '.fc-header-left .fc-button-next',
+    "calendar_prev":     '.fc-header-left .fc-button-prev',
+    "calendar_date_label": '.fc-header-title h2, .fc-header-title',
 
     # Booking modal
     # NOTE: there is intentionally no `modal_item_details` selector — the site
